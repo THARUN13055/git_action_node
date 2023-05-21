@@ -15,7 +15,9 @@ jobs:
         run: npm run lint
       - name: test the npm code
         run: npm run test
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: get code
@@ -24,9 +26,22 @@ jobs:
         run: npm ci
       - name: build website
         run: npm run build
+      - name: upload the artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: path
+          path: dist
+
   deployed:
+    needs: build
     runs-on: ubuntu-latest
     steps: 
+      - name: download the artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: path
+      - name: view the download file
+        run: ls
       - name: echo the command
         run: echo "deploying ...................."
       
