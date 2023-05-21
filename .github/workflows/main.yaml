@@ -19,6 +19,8 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      file-script: ${{ steps.publish.outputs.file-script }}
     steps:
       - name: get code
         uses: actions/checkout@v3
@@ -31,19 +33,24 @@ jobs:
         with:
           name: path
           path: dist
+      - name: publish the job outputs
+        id: publish
+        run: find /dest/assets/*js -type f -execdir echo 'script-file={}' >> $GIT_OUTPUT ';'
 
   deployed:
     needs: build
     runs-on: ubuntu-latest
     steps: 
-      # - name: download the artifact
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: path
-      # - name: view the download file
-      #   run: ls
+      - name: download the artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: path
+      - name: view the download file
+        run: ls
       - name: echo the command
         run: echo "deploying ...................."
+      - name: view the output of the js file
+        run: echo "${{ needs.build.outputs.script-file }}"
       
         
     
