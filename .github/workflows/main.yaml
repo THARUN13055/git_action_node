@@ -36,12 +36,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps: 
-      - name: download the artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: path
-      - name: view the download file
-        run: ls
+      # - name: download the artifact
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: path
+      # - name: view the download file
+      #   run: ls
       - name: echo the command
         run: echo "deploying ...................."
       
