@@ -35,7 +35,7 @@ jobs:
           path: dist
       - name: publish the job outputs
         id: publish
-        run: find /dist/assets/*js -type f -execdir echo '::set-output name=script-file::{}' ';'
+        run: find dist/assets/*js -type f -execdir echo '::set-output name=script-file::{}' ';'
 
   deployed:
     needs: build
