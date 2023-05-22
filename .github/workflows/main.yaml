@@ -1,66 +1,75 @@
-name: git_action_node
+name: Website Deployment
 on:
   push:
     branches:
       - main
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: download the code
+      - name: Get code
         uses: actions/checkout@v3
-      - name: cache the dependency
+      - name: Cache dependencies
+        id: cache
         uses: actions/cache@v3
         with:
-          path: ~/ .npm
-          key: module-${{ hashFiles('**/package-lock.json') }}
-      - name: Install dependency
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
         run: npm ci
       - name: Lint code
         run: npm run lint
-      - name: test the npm code
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Test code
         run: npm run test
-
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test.json
   build:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      file-script: ${{ steps.publish.outputs.file-script }}
     steps:
-      - name: get code
+      - name: Get code
         uses: actions/checkout@v3
-      - name: cache the dependency
+      - name: Cache dependencies
+        id: cache
         uses: actions/cache@v3
         with:
-          path: ~/ .npm
-          key: module-${{ hashFiles('**/package-lock.json') }}
-      - name: Install dependency
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
         run: npm ci
-      - name: build website
+      - name: Build website
+        id: build-website
         run: npm run build
-      - name: upload the artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: path
+          name: dist-files
           path: dist
-      - name: publish the job outputs
-        id: publish
-        run: find dist/assets/*.js -type f -execdir echo '::set-output name=script-file::{}' ';'
-
-  deployed:
+  deploy:
     needs: build
     runs-on: ubuntu-latest
-    steps: 
-      - name: download the artifact
+    steps:
+      - name: Get build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: path
-      - name: view the download file
+          name: dist-files
+      - name: Output contents
         run: ls
-      - name: echo the command
-        run: echo "deploying ...................."
-      - name: view the output of the js file
-        run: echo "${{ needs.build.outputs.script-file }}"
-      
-        
-    
+      - name: Deploy
+        run: echo "Deploying..."
