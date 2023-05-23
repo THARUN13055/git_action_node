@@ -11,4 +11,4 @@ runs:
         key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
     - name: Install depedency
       run: npm run ci
-  shell: bash
+      shell: bash
